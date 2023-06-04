@@ -1,0 +1,218 @@
+version: '3.7'
+
+services:
+  
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: nginx
+    restart: unless-stopped
+    volumes:
+      - ./data/index.php:/var/www/html/index.php
+      - ./nginx/default.conf:/etc/nginx/nginx.conf
+      #- ./nginx/data:/usr/share/nginx/html
+      - ./logs/nginx:/var/log/nginx/
+      
+      #- ./data/:/var/www/html/public/
+    depends_on:
+      - php
+    links:
+      - "php"
+    ports:
+      - 6002:80
+    networks:
+      - backend
+      - frontend
+    
+  mysql:
+    #image: mysql:8.0
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    container_name: mysql
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: mydatabase
+    ports:
+      - 3308:3306
+    volumes:
+      - ./mysql/vol:/var/lib/mysql
+      - ./logs/mysql:/var/log/mysql
+    
+    #expose:
+    #  - 3306
+    networks:
+     - backend
+     
+  phpmyadmin:
+    #image: phpmyadmin
+    build:
+      context: ./phpmyadmin
+      dockerfile: Dockerfile
+    container_name: phpmyadmin
+    restart: unless-stopped
+    hostname: localhost
+    ports:
+      - 8082:80
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mysql
+      #- MYSQL_ROOT_PASSWORD=root
+      #- MYSQL_USER=user
+      #- MYSQL_PASSWORD=password
+    depends_on:
+      - mysql
+    links:
+      - 'mysql:mydatabase'
+    networks:
+      - backend
+
+
+  php:
+    build:
+      context: ./php
+    container_name: php
+    #expose:
+    #  - 9000
+    restart: unless-stopped
+    ports:
+      - 9000:9000
+    volumes:
+      #- ./php/www:./var/www/html
+      #- ./logs/php.log:/var/log/php.log
+      - ./data/:/var/www/html/
+    networks:
+      - backend
+
+
+
+networks:
+  backend:
+  frontend:
+
+
+#volumes:
+#  mysql:
+
+
+
+
+# TEST1
+# services:
+#   nginx:
+#     build:
+#       context: ./nginx
+#       dockerfile: Dockerfile
+#     container_name: nginx
+#     restart: unless-stopped
+#     ports:
+#       - 6666:80
+#     volumes:
+#       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+#       - ./dist:/usr/share/nginx/html
+#     depends_on:
+#       - PHP
+#       - mysql
+#       - phpmyadmin
+#     networks:
+#       - backend
+#       - frontend
+  
+#   PHP:
+#     build:
+#       context: ./php
+#       dockerfile: Dockerfile
+#     container_name: php
+#     restart: unless-stopped
+#     expose:
+#       - 9000
+#     volumes:
+#       - ./php:/var/www/html
+#     networks:
+#       - backend
+  
+#   mysql:
+#     image: mysql:5.7
+#     container_name: mysql
+#     restart: unless-stopped
+#     environment:
+#       MYSQL_ROOT_PASSWORD: root
+#       MYSQL_DATABASE: test
+#       MYSQL_USER: test
+#       MYSQL_PASSWORD: test
+
+#     expose:
+#       - 3306
+#     #ports:
+#     #  - 3306:3306
+#     volumes:
+#       - ./mysql:/var/lib/mysql
+#     networks:
+#       - backend
+
+#   phpmyadmin:
+#     image: phpmyadmin/phpmyadmin
+#     container_name: phpmyadmin
+#     restart: unless-stopped
+#     environment:
+#       PMA_HOST: mysql
+#       PMA_PORT: 3306
+#     ports:
+#       - 6001:80
+#     depends_on:
+#       - mysql
+#     networks:
+#       - backend
+
+# volumes:
+#   mysql:
+  
+  
+# networks:
+#   backend:
+#     driver: bridge
+#   frontend:
+#     driver: bridge
+    
+
+
+
+
+
+
+##GENERATED
+# services:
+#   nginx:
+#     image: nginx:1.13.6-alpine
+#     ports:
+#       - 80:80
+#     volumes:
+#       - ./nginx.conf:/etc/nginx/nginx.conf
+#       - ./dist:/usr/share/nginx/html
+#     depends_on:
+#       - api
+#   mysql:
+#     image: mysql:5.7
+#     environment:
+#       MYSQL_ROOT_PASSWORD: root
+#       MYSQL_DATABASE: test
+#       MYSQL_USER: test
+#       MYSQL_PASSWORD: test
+#     ports:
+#       - 3306:3306
+#     volumes:
+#       - ./mysql:/var/lib/mysql
+#   phpmyadmin:
+#     image: phpmyadmin/phpmyadmin
+#     environment:
+#       PMA_HOST: mysql
+#       PMA_PORT: 3306
+#     ports:
+#       - 8080:80
+#     depends_on:
+#       - mysql
+# volumes:
+#   mysql:
