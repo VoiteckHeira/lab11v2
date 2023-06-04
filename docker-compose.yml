@@ -36,14 +36,14 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: example
       MYSQL_DATABASE: mydatabase
-    ports:
-      - 3308:3306
+    #ports:
+    #  - 3308:3306
     volumes:
       - ./mysql/vol:/var/lib/mysql
       - ./logs/mysql:/var/log/mysql
     
-    #expose:
-    #  - 3306
+    expose:
+      - 3306
     networks:
      - backend
      
@@ -82,7 +82,7 @@ services:
       - 9000:9000
     volumes:
       #- ./php/www:./var/www/html
-      #- ./logs/php.log:/var/log/php.log
+      - ./logs/php.log:/var/log/httpd/error_log
       - ./data/:/var/www/html/
     networks:
       - backend
